@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Snake</title>
+</head>
+<body>
+<canvas width="810" height ="420" id="canvas"></canvas>
+</body>
+<script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+
+    const field_rows = 30, field_columns = 50;
+
+    const cell_width = 15;
+
+    function collision(snake, food) {
+        return snake.body[0].row === food.position_row
+            && snake.body[0].column === food.position_column
+    }
+
+    function Food() {
+        this.position_row = 20;
+        this.position_column = 20;
+
+        this.spawn = function (){
+            this.position_row = Math.round(Math.random() * field_rows - 1);
+            this.position_column = Math.round(Math.random() * field_columns - 1);
+        }
+    }
+
+    function Snake() {
+        this.direction = {row: 1, column: 0};
+
+        this.body = [
+            {row: 7, column: 7},
+            {row: 7, column: 6},
+            {row: 7, column: 5},
+            {row: 7, column: 4},
+        ];
+
+        this.setDirectionUp = function (){
+            this.direction = {row: -1, column: 0};
+        }
+
+        this.setDirectionDown = function (){
+            this.direction = {row: 1, column: 0};
+        }
+
+        this.setDirectionRight = function (){
+            this.direction = {row: 0, column: 1};
+        }
+
+        this.setDirectionLeft = function (){
+            this.direction = {row: 0, column: -1};
+        }
+
+        this.move = function () {
+            // перемещение хвоста
+            for (let i = this.body.length - 1; i > 0 ; i--) {
+              this.body[i].row = this.body[i-1].row;
+              this.body[i].column = this.body[i-1].column;
+            }
+
+            // перемещение головы
+            this.body[0].row += this.direction.row;
+            this.body[0].column += this.direction.column;
+        }
+    }
+
+    let snake = new Snake();
+    let food = new Food();
+
+    setInterval(() => {
+        draw();
+        if (collision(snake, food)) food.spawn();
+        snake.move();
+    }, 100);
+
+    function draw() {
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        for (let i = 0; i < field_columns; i++)
+            for (let j = 0; j < field_rows; j++) {
+                ctx.beginPath();
+                ctx.rect(i * cell_width, j * cell_width, cell_width, cell_width);
+                ctx.stroke();
+                // Отрисовка змейки
+                snake.body.map((item, index) => {
+                    ctx.beginPath();
+                    ctx.fillStyle = "#000000";
+                    if (index === 0)
+                        ctx.fillStyle = "#ff0000";
+                    ctx.rect(item.column * cell_width, item.row * cell_width, cell_width, cell_width);
+                    ctx.fill();
+                })
+                //
+
+                //отрисовка еды
+                ctx.beginPath();
+                ctx.rect(food.position_column * cell_width, food.position_row * cell_width, cell_width, cell_width);
+                ctx.fillStyle = "#00ff00";
+                ctx.fill();
+            }
+    }
+
+    document.addEventListener("keypress", (e) => {
+        switch (e.code){
+            case "KeyW":
+                snake.setDirectionUp();
+                break;
+            case "KeyS":
+                snake.setDirectionDown();
+                break;
+            case "KeyA":
+                snake.setDirectionLeft();
+                break;
+            case "KeyD":
+                snake.setDirectionRight();
+                break;
+        }
+    })
+
+</script>
+</html>
