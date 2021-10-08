@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Snake</title>
+    <meta charset="UTF-8">
+    <title>Snake</title>
 </head>
 <body>
-<canvas width="810" height ="420" id="canvas"></canvas>
+<canvas width="810" height="420" id="canvas"></canvas>
 </body>
 <script>
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
 
-    const field_rows = 30, field_columns = 50;
+    const field_rows = 29, field_columns = 50;
 
     const cell_width = 15;
 
@@ -24,7 +24,7 @@
         this.position_row = 20;
         this.position_column = 20;
 
-        this.spawn = function (){
+        this.spawn = function () {
             this.position_row = Math.round(Math.random() * field_rows - 1);
             this.position_column = Math.round(Math.random() * field_columns - 1);
         }
@@ -33,49 +33,75 @@
     function Snake() {
         this.direction = {row: 1, column: 0};
 
-        this.body = [
-            {row: 7, column: 7},
-            {row: 7, column: 6},
-            {row: 7, column: 5},
-            {row: 7, column: 4},
-        ];
+        this.body = [];
 
-        this.setDirectionUp = function (){
+        // создание змейки, вызывается вначале игры, и при выходе змейки за поле
+        this.create = function () {
+            const head = {
+                row: Math.round(field_rows / 2),
+                column: Math.round(field_columns / 2)
+            }
+
+            this.body = [
+                head,
+                {row: head.row, column: head.column - 1}
+            ];
+
+            this.setDirectionRight();
+        }
+
+        this.setDirectionUp = function () {
             this.direction = {row: -1, column: 0};
         }
 
-        this.setDirectionDown = function (){
+        this.setDirectionDown = function () {
             this.direction = {row: 1, column: 0};
         }
 
-        this.setDirectionRight = function (){
+        this.setDirectionRight = function () {
             this.direction = {row: 0, column: 1};
         }
 
-        this.setDirectionLeft = function (){
+        this.setDirectionLeft = function () {
             this.direction = {row: 0, column: -1};
+        }
+
+        // обновление змейки, вызывается каждый шаг игры
+        this.update = function () {
+            this.move();
+            if (this.outOfTheField()) this.create();
         }
 
         this.move = function () {
             // перемещение хвоста
-            for (let i = this.body.length - 1; i > 0 ; i--) {
-              this.body[i].row = this.body[i-1].row;
-              this.body[i].column = this.body[i-1].column;
+            for (let i = this.body.length - 1; i > 0; i--) {
+                this.body[i].row = this.body[i - 1].row;
+                this.body[i].column = this.body[i - 1].column;
             }
 
             // перемещение головы
             this.body[0].row += this.direction.row;
             this.body[0].column += this.direction.column;
         }
+
+        // находится ли змейка вне поля
+        this.outOfTheField = function () {
+            let snakeHead = this.body[0];
+
+            return snakeHead.row < 0 || snakeHead.row > field_rows - 2 ||
+                snakeHead.column < 0 || snakeHead.column > field_columns - 1;
+        }
+
+        this.create();
     }
 
     let snake = new Snake();
     let food = new Food();
 
     setInterval(() => {
-        draw();
         if (collision(snake, food)) food.spawn();
-        snake.move();
+        snake.update();
+        draw();
     }, 100);
 
     function draw() {
@@ -107,7 +133,7 @@
     }
 
     document.addEventListener("keypress", (e) => {
-        switch (e.code){
+        switch (e.code) {
             case "KeyW":
                 snake.setDirectionUp();
                 break;
