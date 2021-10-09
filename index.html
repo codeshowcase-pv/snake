@@ -71,13 +71,25 @@
         this.update = function () {
             this.updateLocationOfNewPart();
             this.move();
-            if (this.outOfTheField()) this.create();
+            if (this.outOfTheField() || this.collisionWithSelf()) this.create();
         }
 
+        // обнаружение столкновения с самой собой
+        this.collisionWithSelf = function () {
+            // получение сета из массива строк, составленных из координат змейки
+            // сет делает из массива уникальную коллекция
+            const uniqueLocations = new Set(this.body.map(part => part.row.toString() + part.column.toString()));
+
+            //если уникальных локаций и длина тела змейки разные, то как минимум две частички змейки совпадают
+            return uniqueLocations.size !== this.body.length;
+        }
+
+        // добавление частички в конец змейки
         this.addPart = function () {
             this.body.push(Object.create(this.locationOfNewPart));
         }
 
+        // обновление координат для новой частички
         this.updateLocationOfNewPart = function () {
             this.locationOfNewPart.row = this.body[this.body.length -1].row;
             this.locationOfNewPart.column = this.body[this.body.length -1].column;
