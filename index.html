@@ -32,6 +32,7 @@
 
     function Snake() {
         this.direction = {row: 1, column: 0};
+        this.locationOfNewPart = {row: null, column: null};
 
         this.body = [];
 
@@ -68,8 +69,18 @@
 
         // обновление змейки, вызывается каждый шаг игры
         this.update = function () {
+            this.updateLocationOfNewPart();
             this.move();
             if (this.outOfTheField()) this.create();
+        }
+
+        this.addPart = function () {
+            this.body.push(Object.create(this.locationOfNewPart));
+        }
+
+        this.updateLocationOfNewPart = function () {
+            this.locationOfNewPart.row = this.body[this.body.length -1].row;
+            this.locationOfNewPart.column = this.body[this.body.length -1].column;
         }
 
         this.move = function () {
@@ -99,7 +110,10 @@
     let food = new Food();
 
     setInterval(() => {
-        if (collision(snake, food)) food.spawn();
+        if (collision(snake, food)) {
+            food.spawn();
+            snake.addPart();
+        }
         snake.update();
         draw();
     }, 100);
