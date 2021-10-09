@@ -23,18 +23,27 @@
     function Food() {
         this.position_row = 20;
         this.position_column = 20;
+        this.color = "#00ff00";
 
         this.spawn = function () {
             this.position_row = Math.round(Math.random() * field_rows - 1);
             this.position_column = Math.round(Math.random() * field_columns - 1);
+        }
+
+        this.draw = function () {
+            //отрисовка еды
+            ctx.beginPath();
+            ctx.rect(food.position_column * cell_width, food.position_row * cell_width, cell_width, cell_width);
+            ctx.fillStyle = this.color;
+            ctx.fill();
         }
     }
 
     function Snake() {
         this.direction = {row: 1, column: 0};
         this.locationOfNewPart = {row: null, column: null};
-
         this.body = [];
+        this.color = "#ff0000";
 
         // создание змейки, вызывается вначале игры, и при выходе змейки за поле
         this.create = function () {
@@ -72,6 +81,20 @@
             this.updateLocationOfNewPart();
             this.move();
             if (this.outOfTheField() || this.collisionWithSelf()) this.create();
+        }
+
+        this.draw = function () {
+            // Отрисовка змейки
+            snake.body.map((item, index) => {
+                ctx.beginPath();
+                ctx.fillStyle = "#000000";
+
+                if (index === 0)
+                    ctx.fillStyle = this.color;
+
+                ctx.rect(item.column * cell_width, item.row * cell_width, cell_width, cell_width);
+                ctx.fill();
+            })
         }
 
         // обнаружение столкновения с самой собой
@@ -131,31 +154,19 @@
     }, 100);
 
     function draw() {
-
+        // очистка поля
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+        // отрисовка поля
         for (let i = 0; i < field_columns; i++)
             for (let j = 0; j < field_rows; j++) {
                 ctx.beginPath();
                 ctx.rect(i * cell_width, j * cell_width, cell_width, cell_width);
                 ctx.stroke();
-                // Отрисовка змейки
-                snake.body.map((item, index) => {
-                    ctx.beginPath();
-                    ctx.fillStyle = "#000000";
-                    if (index === 0)
-                        ctx.fillStyle = "#ff0000";
-                    ctx.rect(item.column * cell_width, item.row * cell_width, cell_width, cell_width);
-                    ctx.fill();
-                })
-                //
-
-                //отрисовка еды
-                ctx.beginPath();
-                ctx.rect(food.position_column * cell_width, food.position_row * cell_width, cell_width, cell_width);
-                ctx.fillStyle = "#00ff00";
-                ctx.fill();
             }
+
+        snake.draw();
+        food.draw();
     }
 
     document.addEventListener("keypress", (e) => {
